@@ -14,6 +14,9 @@ function createImage(imageSrc) {
 }
 
 const platformImg = createImage("http://127.0.0.1:5500/images/platform.png");
+const platformTallImg = createImage(
+  "http://127.0.0.1:5500/images/platformSmallTall.png"
+);
 class GenericObjects {
   constructor({ x, y, image }) {
     this.position = {
@@ -67,6 +70,7 @@ class Player {
       x: 0,
       y: 1,
     };
+    this.speed = 10;
     this.width = 20;
     this.height = 20;
   }
@@ -80,10 +84,10 @@ class Player {
     genericObjects.forEach((genericObject) => {
       genericObject.draw();
     });
-    this.draw();
     platforms.forEach((platform) => {
       platform.draw();
     });
+    this.draw();
     this.position.x += this.velocity.x;
     this.position.y += this.velocity.y;
 
@@ -93,27 +97,9 @@ class Player {
   }
 }
 
-let player = new Player();
-let platforms = [
-  new Platform({ x: -1, y: 470, image: platformImg }),
-  new Platform({ x: platformImg.width - 3, y: 470, image: platformImg }),
-  new Platform({ x: platformImg.width * 2 + 100, y: 470, image: platformImg }),
-  new Platform({ x: platformImg.width * 3 + 300, y: 470, image: platformImg }),
-  new Platform({ x: platformImg.width * 5, y: 470, image: platformImg }),
-  new Platform({ x: platformImg.width * 6 - 2, y: 470, image: platformImg }),
-];
-let genericObjects = [
-  new GenericObjects({
-    x: -1,
-    y: -1,
-    image: createImage("http://127.0.0.1:5500/images/background.png"),
-  }),
-  new GenericObjects({
-    x: 0,
-    y: 0,
-    image: createImage("http://127.0.0.1:5500/images/hills.png"),
-  }),
-];
+let player;
+let platforms = [];
+let genericObjects = [];
 
 const keys = {
   right: {
@@ -128,6 +114,11 @@ function init() {
   rightOffset = 0;
   player = new Player();
   platforms = [
+    new Platform({
+      x: platformImg.width * 4 - platformTallImg.width + 300,
+      y: 370,
+      image: platformTallImg,
+    }),
     new Platform({ x: -1, y: 470, image: platformImg }),
     new Platform({ x: platformImg.width - 3, y: 470, image: platformImg }),
     new Platform({
@@ -162,27 +153,29 @@ function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   player.update();
   if (keys.right.pressed && player.position.x < 400) {
-    player.velocity.x = 5;
-  } else if (keys.left.pressed && player.position.x > 100) {
-    player.velocity.x = -5;
+    player.velocity.x = player.speed;
+  } else if ((keys.left.pressed && player.position.x > 100) || (keys.left.pressed && rightOffset === 0 && player.position.x > 0)) {
+    player.velocity.x = -player.speed;
   } else {
     player.velocity.x = 0;
     genericObjects.forEach((genericObject) => {
       if (keys.right.pressed) {
-        genericObject.position.x -= 2;
-      } else if (keys.left.pressed) {
-        genericObject.position.x += 2;
+        genericObject.position.x -= player.speed * 0.44;
+      } else if (keys.left.pressed && rightOffset > 0) {
+        genericObject.position.x += player.speed * 0.44;
       }
     });
-    platforms.forEach((platform) => {
-      if (keys.right.pressed) {
-        rightOffset += 5;
-        platform.position.x -= 5;
-      } else if (keys.left.pressed) {
-        rightOffset -= 5;
-        platform.position.x += 5;
-      }
-    });
+    if (keys.right.pressed) {
+      rightOffset += player.speed;
+      platforms.forEach((platform) => {
+        platform.position.x -= player.speed;
+      });
+    } else if (keys.left.pressed && rightOffset > 0) {
+      rightOffset -= player.speed;
+      platforms.forEach((platform) => {
+        platform.position.x += player.speed;
+      });
+    }
   }
 
   // Platform collision detection
@@ -198,15 +191,15 @@ function animate() {
     }
   });
 
-  if (rightOffset > 6000) {
+  if (rightOffset > platformImg.width * 6) {
     console.log("You win!");
   }
   if (player.position.y > canvas.height) {
     console.log("You lose");
-    init()
+    init();
   }
 }
-
+init();
 animate();
 
 window.addEventListener("keydown", ({ keyCode }) => {
@@ -221,7 +214,7 @@ window.addEventListener("keydown", ({ keyCode }) => {
       break;
     case 87:
       console.log("top");
-      player.velocity.y -= 20;
+      player.velocity.y -= 18;
       break;
     case 83:
       console.log("down");
