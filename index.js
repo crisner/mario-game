@@ -93,8 +93,8 @@ class Player {
   }
 }
 
-const player = new Player();
-const platforms = [
+let player = new Player();
+let platforms = [
   new Platform({ x: -1, y: 470, image: platformImg }),
   new Platform({ x: platformImg.width - 3, y: 470, image: platformImg }),
   new Platform({ x: platformImg.width * 2 + 100, y: 470, image: platformImg }),
@@ -102,7 +102,7 @@ const platforms = [
   new Platform({ x: platformImg.width * 5, y: 470, image: platformImg }),
   new Platform({ x: platformImg.width * 6 - 2, y: 470, image: platformImg }),
 ];
-const genericObjects = [
+let genericObjects = [
   new GenericObjects({
     x: -1,
     y: -1,
@@ -123,6 +123,39 @@ const keys = {
     pressed: false,
   },
 };
+
+function init() {
+  rightOffset = 0;
+  player = new Player();
+  platforms = [
+    new Platform({ x: -1, y: 470, image: platformImg }),
+    new Platform({ x: platformImg.width - 3, y: 470, image: platformImg }),
+    new Platform({
+      x: platformImg.width * 2 + 100,
+      y: 470,
+      image: platformImg,
+    }),
+    new Platform({
+      x: platformImg.width * 3 + 300,
+      y: 470,
+      image: platformImg,
+    }),
+    new Platform({ x: platformImg.width * 5, y: 470, image: platformImg }),
+    new Platform({ x: platformImg.width * 6 - 2, y: 470, image: platformImg }),
+  ];
+  genericObjects = [
+    new GenericObjects({
+      x: -1,
+      y: -1,
+      image: createImage("http://127.0.0.1:5500/images/background.png"),
+    }),
+    new GenericObjects({
+      x: 0,
+      y: 0,
+      image: createImage("http://127.0.0.1:5500/images/hills.png"),
+    }),
+  ];
+}
 
 function animate() {
   requestAnimationFrame(animate);
@@ -170,6 +203,7 @@ function animate() {
   }
   if (player.position.y > canvas.height) {
     console.log("You lose");
+    init()
   }
 }
 
